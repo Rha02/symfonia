@@ -1,3 +1,5 @@
+import SearchBar from "@/components/SearchBar";
+
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -13,8 +15,11 @@ export default function RootLayout({
                     Button
                 </button>
             </nav>
-            <div>
-                {children}
+            <div className="mx-8 my-2">
+                <SearchBar />
+                <div className="mt-4">
+                    {children}
+                </div>
             </div>
         </div>
     );
