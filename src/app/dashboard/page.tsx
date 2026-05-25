@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function Dashboard() {
     return (
-        <main>
+        <main className="mx-8 my-2">
             <PortfolioTrend />
         </main>
     )
