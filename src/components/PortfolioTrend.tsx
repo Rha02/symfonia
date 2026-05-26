@@ -75,7 +75,7 @@ export default function PortfolioTrend() {
                     </li>
                 </ul>
             </div>
-            <div className='flex gap-x-2 items-center'>
+            <div className='flex gap-x-2 items-center mb-2'>
                 <div className='flex gap-x-2 items-end'>
                     <h2 className='font-semibold text-2xl text-indigo-950'>$123,123.12</h2>
                     <p className='text-lg font-semibold text-green-600'>+5.68%</p>
