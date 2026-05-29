@@ -1,33 +1,20 @@
 import { SearchResult } from "@/models";
 
 export async function GET(req: Request) {
-    const dummyResponse: SearchResult[] = [
-        {
-            symbol: "STCK",
-            name: "Some Stock",
-            price: 101.12
-        },
-        {
-            symbol: "TEST",
-            name: "Some Stock",
-            price: 90.58
-        },
-        {
-            symbol: "SOME",
-            name: "Some Stock",
-            price: 423.15
-        },
-        {
-            symbol: "SUM",
-            name: "Some Stock",
-            price: 12.91
-        },
-        {
-            symbol: "TIX",
-            name: "Some Stock",
-            price: 203.47
-        }
-    ]
+    const host = process.env.SYMFONIA_BACKEND!
+    
+    const { searchParams } = new URL(req.url)
+    const q = searchParams.get("q")!
 
-    return Response.json(dummyResponse)
+    const params = new URLSearchParams({
+        value: q
+    })
+    
+    const res = await fetch(host + `/stocks/search?${params.toString()}`)
+
+    const data: SearchResult[] = await res.json()
+
+    console.log(data)
+
+    return Response.json(data)
 }
