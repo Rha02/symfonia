@@ -14,7 +14,5 @@ export async function GET(req: Request) {
 
     const data: SearchResult[] = await res.json()
 
-    console.log(data)
-
     return Response.json(data)
 }

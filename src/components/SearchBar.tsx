@@ -2,6 +2,7 @@
 import { useRef, useState } from "react";
 import { Search } from "./icons";
 import { SearchResult } from "@/models";
+import Link from "next/link";
 
 export default function SearchBar() {
     const [results, setResults] = useState<SearchResult[]>([])
@@ -42,16 +43,18 @@ export default function SearchBar() {
                     { results.length > 0 ? (
                         <ul className="px-2 pt-2 pb-1 text-indigo-900">
                             {results.map((result) => (
-                                <li key={result.symbol} className="flex justify-between hover:bg-indigo-100 px-2 py-1 rounded transition ease-in-out">
-                                    <div>
-                                        <h6 className="font-semibold mr-4">
-                                            {result.symbol}
-                                        </h6>
-                                        <p>{result.name}</p>
-                                    </div>
-                                    <div className="font-semibold">
-                                        ${result.price}
-                                    </div>
+                                <li key={result.symbol} className="hover:bg-indigo-100 rounded transition ease-in-out">
+                                    <Link href={`/stocks/${result.symbol}`} className="flex justify-between px-2 py-1">
+                                        <div>
+                                            <h6 className="font-semibold mr-4">
+                                                {result.symbol}
+                                            </h6>
+                                            <p>{result.name}</p>
+                                        </div>
+                                        <div className="font-semibold">
+                                            ${result.price}
+                                        </div>
+                                    </Link>
                                 </li>
                             ))}
                         </ul>
