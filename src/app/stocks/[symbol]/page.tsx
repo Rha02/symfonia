@@ -1,3 +1,4 @@
+import SearchBar from "@/components/SearchBar";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -13,8 +14,11 @@ export default async function StockPage(props: StockPageProps) {
     const { symbol } = await props.params
 
     return (
-        <main>
-            {symbol}
-        </main>
+        <div>
+            <SearchBar />
+            <div className="mt-4">
+                {symbol}
+            </div>
+        </div>
     )
 }
