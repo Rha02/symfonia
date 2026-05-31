@@ -1,5 +1,6 @@
 import PortfolioTrend from "@/components/PortfolioTrend";
 import SearchBar from "@/components/SearchBar";
+import { Stock } from "@/models";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -14,6 +15,10 @@ type StockPageProps = {
 export default async function StockPage(props: StockPageProps) {
     const { symbol } = await props.params
 
+    const host = process.env.SYMFONIA_BACKEND!
+    const res = await fetch(host + `/stocks/${symbol}`)
+    const data: Stock = await res.json()
+
     return (
         <div>
             <SearchBar />
@@ -23,7 +28,7 @@ export default async function StockPage(props: StockPageProps) {
                         {symbol}
                     </h1>
                     <p className="text-lg text-gray-600">
-                        Company LLC
+                        {data.name}
                     </p>
                 </div>
                 <PortfolioTrend />

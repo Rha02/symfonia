@@ -4,4 +4,9 @@ type SearchResult = {
     price: number;
 }
 
-export type { SearchResult };
+type Stock = {
+    symbol: string;
+    name: string;
+}
+
+export type { SearchResult, Stock };
