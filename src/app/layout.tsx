@@ -30,8 +30,8 @@ export default function RootLayout({
     >
       <body className="flex">
         <nav className="flex flex-col h-screen bg-indigo-800 text-white px-2 w-48 py-2 shrink-0">
-          <h1 className="text-xl text-center w-full font-semibold text-indigo-100">SideBar</h1>
-          <ul className="flex flex-col mt-2">
+          <h1 className="text-xl text-center w-full font-semibold text-indigo-100 mt-1">SideBar</h1>
+          <ul className="flex flex-col mt-4">
             <li className="hover:bg-indigo-700 rounded transition ease-in-out">
               <Link href='/dashboard' className="flex px-2 py-1">Dashboard</Link>
             </li>

@@ -1,9 +1,10 @@
+import PortfolioTrend from "@/components/PortfolioTrend";
 import SearchBar from "@/components/SearchBar";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Symfonia | Dashboard",
-    description: "Dashboard page of Symfonia",
+    title: "Symfonia | Stock",
+    description: "Stock page of Symfonia",
 };
 
 type StockPageProps = {
@@ -17,7 +18,15 @@ export default async function StockPage(props: StockPageProps) {
         <div>
             <SearchBar />
             <div className="mt-4">
-                {symbol}
+                <div className="flex gap-x-2 ">
+                    <h1 className="text-2xl font-semibold text-gray-900">
+                        {symbol}
+                    </h1>
+                    <p className="text-lg text-gray-600">
+                        Company LLC
+                    </p>
+                </div>
+                <PortfolioTrend />
             </div>
         </div>
     )

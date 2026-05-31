@@ -8,6 +8,11 @@ export const metadata: Metadata = {
 
 export default function Dashboard() {
     return (
-        <PortfolioTrend />
+        <div>
+            <h1 className="text-2xl font-semibold text-gray-900">
+                Portfolio
+            </h1>
+            <PortfolioTrend />
+        </div>
     )
 }
