@@ -10,7 +10,7 @@ export async function GET(req: Request) {
         value: q
     })
     
-    const res = await fetch(host + `/stocks/search?${params.toString()}`)
+    const res = await fetch(host + `/search/stocks?${params.toString()}`)
 
     const data: SearchResult[] = await res.json()
 
