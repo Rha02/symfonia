@@ -11,6 +11,7 @@ import {
     Legend,
 } from 'chart.js';
 import { Eye, Reload } from '@/components/icons'
+import { TrendCoord } from '@/models';
 
 ChartJS.register(
     CategoryScale,
@@ -22,7 +23,11 @@ ChartJS.register(
     Legend
 );
 
-export default function PortfolioTrend() {
+type PortfolioTrendProps = {
+    coords: TrendCoord[]
+}
+
+export default function PortfolioTrend(props: PortfolioTrendProps) {
     const options = {
         responsive: true,
         plugins: {
@@ -30,16 +35,40 @@ export default function PortfolioTrend() {
                 display: false
             }
         },
+        scales: {
+            x: {
+                ticks: {
+                    maxTicksLimit: 5,
+                    callback: (value: string | number, idx: number) => {
+                        if (idx < 30) {
+                            return null
+                        }
+                        
+                        const date = new Date(labels[Number(value)])
+                        return date.toLocaleTimeString([], { 
+                            hour: '2-digit', 
+                            minute: '2-digit', 
+                            hour12: false 
+                        })
+                    }
+                }
+            }
+        }
     };
 
+    const coords = props.coords
+    const labels = coords.map(coord => coord.timestamp)
+    const values = coords.map(coord => coord.value)
+
     const data = {
-        labels: ['9:00', '12:00', '16:00', '20:00'],
+        labels: labels,
         datasets: [
             {
                 label: 'My Dataset',
-                data: [1000, 1020, 890, 1120],
+                data: values,
                 borderColor: 'rgb(53, 162, 235)',
-                backgroundColor: 'rgba(53, 162, 235, 0.5)'
+                backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                pointRadius: 0
             }
         ]
     }
