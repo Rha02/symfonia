@@ -1,6 +1,6 @@
 import PortfolioTrend from "@/components/PortfolioTrend";
 import SearchBar from "@/components/SearchBar";
-import { Stock } from "@/models";
+import { Stock, StockTrendCoord, TrendCoord } from "@/models";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -16,8 +16,41 @@ export default async function StockPage(props: StockPageProps) {
     const { symbol } = await props.params
 
     const host = process.env.SYMFONIA_BACKEND!
-    const res = await fetch(host + `/stocks/${symbol}`)
-    const data: Stock = await res.json()
+    const stockPromise: Promise<Stock> = fetch(host + `/stocks/${symbol}`).then(async res => {
+        return await res.json()
+    })
+
+    const LIMIT = 500;
+
+    const TIMEFRAME_MINUTES = Math.ceil((24 * 60) / LIMIT);
+    const TIMEFRAME = `${TIMEFRAME_MINUTES}T`;
+    
+    const now = new Date()
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+
+    const msPerFrame = TIMEFRAME_MINUTES * 60 * 1000;
+    const flooredMs = Math.floor(oneDayAgo.getTime() / msPerFrame) * msPerFrame
+    const start = new Date(flooredMs).toISOString().replace(/\.\d{3}Z$/, "Z");
+
+    const params = new URLSearchParams({
+        timeframe: TIMEFRAME,
+        start: start,
+        limit: "500"
+    })
+
+    const stockTrendPromise: Promise<StockTrendCoord[]> = fetch(host + `/stocks/${symbol}/trend?${params.toString()}`).then(async res => {
+        return await res.json()
+    })
+
+    const stock = await stockPromise;
+    const stockTrend = await stockTrendPromise;
+
+    const coords: TrendCoord[] = stockTrend.map(st => {
+        return {
+            value: st.vw,
+            timestamp: st.t
+        }
+    })
 
     return (
         <div>
@@ -28,10 +61,10 @@ export default async function StockPage(props: StockPageProps) {
                         {symbol}
                     </h1>
                     <p className="text-lg text-gray-600">
-                        {data.name}
+                        {stock.name}
                     </p>
                 </div>
-                <PortfolioTrend />
+                <PortfolioTrend coords={coords} />
             </div>
         </div>
     )

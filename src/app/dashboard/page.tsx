@@ -12,7 +12,7 @@ export default function Dashboard() {
             <h1 className="text-2xl font-semibold text-gray-900">
                 Portfolio
             </h1>
-            <PortfolioTrend />
+            <PortfolioTrend coords={[]} />
         </div>
     )
 }
