@@ -73,13 +73,19 @@ export default function PortfolioTrend(props: PortfolioTrendProps) {
         ]
     }
 
+    const firstPrice = coords[0].value
+    const lastPrice = coords[coords.length - 1].value
+    const percentChange = ((lastPrice / firstPrice) - 1) * 100
+
     return (
         <section className='w-1/2 px-4 py-2 border-1 rounded-lg shadow border-indigo-300'>
             <div className='flex justify-between items-center mb-2'>
                 <div className='flex gap-x-2 items-center'>
                     <div className='flex gap-x-2 items-end'>
-                        <h2 className='font-semibold text-2xl text-indigo-950'>$123,123.12</h2>
-                        <p className='text-lg font-semibold text-green-600'>+5.68%</p>
+                        <h2 className='font-semibold text-2xl text-indigo-950'>{lastPrice.toFixed(2)}</h2>
+                        {percentChange > 0 ? <p className='text-lg font-semibold text-green-600'>+{Math.abs(percentChange).toFixed(2)}%</p>
+                            : <p className='text-lg font-semibold text-red-600'>{percentChange.toFixed(2)}%</p> }
+                        
                     </div>
                     <button className='py-1 px-1 rounded-lg hover:bg-indigo-100'>
                         <Eye className='opacity-75' />
