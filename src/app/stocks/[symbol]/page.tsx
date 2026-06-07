@@ -46,7 +46,14 @@ export default async function StockPage(props: StockPageProps) {
     })
 
     const stockTrendPromise: Promise<StockTrendCoord[]> = fetch(host + `/stocks/${symbol}/trend?${params.toString()}`).then(async res => {
+        if (!res.ok) {
+            const errorText = await res.text()
+            throw new Error(`HTTP ${res.status}: ${errorText}`)
+        }
         return await res.json()
+    }).catch(err => {
+        console.log(err)
+        return []
     })
 
     const stock = await stockPromise;
