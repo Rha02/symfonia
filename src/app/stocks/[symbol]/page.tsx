@@ -26,6 +26,13 @@ export default async function StockPage(props: StockPageProps) {
     const TIMEFRAME = `${TIMEFRAME_MINUTES}T`;
     
     const now = new Date()
+    const day = now.getUTCDay()
+    if (day === 0 || day === 6) {
+        const daysToSubtract = day === 0 ? 2 : 1
+        now.setUTCDate(now.getUTCDate() - daysToSubtract)
+        now.setUTCHours(23, 59, 59, 0)
+    }
+
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
 
     const msPerFrame = TIMEFRAME_MINUTES * 60 * 1000;
@@ -39,7 +46,14 @@ export default async function StockPage(props: StockPageProps) {
     })
 
     const stockTrendPromise: Promise<StockTrendCoord[]> = fetch(host + `/stocks/${symbol}/trend?${params.toString()}`).then(async res => {
+        if (!res.ok) {
+            const errorText = await res.text()
+            throw new Error(`HTTP ${res.status}: ${errorText}`)
+        }
         return await res.json()
+    }).catch(err => {
+        console.log(err)
+        return []
     })
 
     const stock = await stockPromise;
