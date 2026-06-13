@@ -25,4 +25,12 @@ type TrendCoord = {
     timestamp: string
 }
 
-export type { SearchResult, Stock, StockTrendCoord, TrendCoord };
+type PortfolioResponse = {
+    timestamp: number[],
+    equity: number[],
+    profit_loss: number[],
+    profit_loss_pct: number[]
+    base_value: number
+}
+
+export type { SearchResult, Stock, StockTrendCoord, TrendCoord, PortfolioResponse };
