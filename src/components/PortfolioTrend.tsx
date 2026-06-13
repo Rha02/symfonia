@@ -11,7 +11,8 @@ import {
     Legend,
 } from 'chart.js';
 import { Eye, Reload } from '@/components/icons'
-import { TrendCoord } from '@/models';
+import { PortfolioResponse, TrendCoord } from '@/models';
+import { useCallback, useEffect, useState } from 'react';
 
 ChartJS.register(
     CategoryScale,
@@ -27,7 +28,32 @@ type PortfolioTrendProps = {
     coords: TrendCoord[]
 }
 
+const PERIODS = ['1D', '1W', '1M', '3M', '1Y', '5Y', 'All'] as const;
+type Period = typeof PERIODS[number];
+
 export default function PortfolioTrend(props: PortfolioTrendProps) {
+    const [coords, setCoords] = useState<TrendCoord[]>([])
+    const [period, setPeriod] = useState<Period>('1D')
+    const [loading, setLoading] = useState(true)
+
+    const fetchCoords = useCallback(async (p: Period) => {
+        try {
+            const res = await fetch(`/api/portfolio/trend?period=${p}`)
+            const data: PortfolioResponse = await res.json()
+            const newCoords: TrendCoord[] = data.timestamp.map((ts, i) => ({
+                timestamp: new Date(ts * 1000).toISOString(),
+                value: data.equity[i],
+            }))
+            setCoords(newCoords)
+        } finally {
+            setLoading(false)
+        }
+    }, [])
+
+    useEffect(() => {
+        fetchCoords(period)
+    }, [period, fetchCoords])
+
     const options = {
         responsive: true,
         plugins: {
@@ -56,7 +82,6 @@ export default function PortfolioTrend(props: PortfolioTrendProps) {
         }
     };
 
-    const coords = props.coords
     const labels = coords.map(coord => coord.timestamp)
     const values = coords.map(coord => coord.value)
 
@@ -73,6 +98,11 @@ export default function PortfolioTrend(props: PortfolioTrendProps) {
         ]
     }
 
+    const onReload = () => {
+        setLoading(true)
+        fetchCoords(period)
+    }
+
     return (
         <section className='w-1/2 px-4 py-2 border-1 rounded-lg shadow border-indigo-300'>
             <div className='flex justify-between items-center mb-2'>
@@ -83,29 +113,16 @@ export default function PortfolioTrend(props: PortfolioTrendProps) {
                     </button>
                 </div>
                 <ul className='flex gap-x-1 text-indigo-900'>
+                    {PERIODS.map(p => (
+                        <li key={p}>
+                            <button className={`py-1 px-2 rounded ${period === p ? 'bg-indigo-100' : ''}`} onClick={() => setPeriod(p)}>{p}</button>
+                        </li>
+                    ))}
                     <li>
-                        <button className='py-1 px-2 bg-indigo-100 rounded'>1D</button>
-                    </li>
-                    <li>
-                        <button className='py-1 px-2 rounded'>1W</button>
-                    </li>
-                    <li>
-                        <button className='py-1 px-2 rounded'>1M</button>
-                    </li>
-                    <li>
-                        <button className='py-1 px-2 rounded'>3M</button>
-                    </li>
-                    <li>
-                        <button className='py-1 px-2 rounded'>1Y</button>
-                    </li>
-                    <li>
-                        <button className='py-1 px-2 rounded'>5Y</button>
-                    </li>
-                    <li>
-                        <button className='py-1 px-2 rounded'>All</button>
-                    </li>
-                    <li>
-                        <button className='py-1 px-2 rounded hover:bg-indigo-50 rounded-full transition ease-in-out duration-150'><Reload width={16} /></button>
+                        <button className='py-1 px-2 rounded hover:bg-indigo-50 rounded-full transition ease-in-out duration-150'
+                            onClick={onReload}>
+                            <Reload width={16} />
+                        </button>
                     </li>
                 </ul>
             </div>
