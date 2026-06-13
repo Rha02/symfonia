@@ -126,13 +126,16 @@ function PriceComponent(props: PortfolioTrendProps) {
         )
     }
 
-    const firstPrice = coords[0].value
+    let i = 0
+    for (; i < coords.length && coords[i].value == 0; i++) {}
+
+    const firstPrice = coords[i].value
     const lastPrice = coords[coords.length - 1].value
     const percentChange = ((lastPrice / firstPrice) - 1) * 100
 
     return (
         <div className='flex gap-x-2 items-end'>
-            <h2 className='font-semibold text-2xl text-indigo-950'>{lastPrice.toFixed(2)}</h2>
+            <h2 className='font-semibold text-2xl text-indigo-950'>${lastPrice.toFixed(2)}</h2>
             {percentChange > 0 ? <p className='text-lg font-semibold text-green-600'>+{Math.abs(percentChange).toFixed(2)}%</p>
                 : <p className='text-lg font-semibold text-red-600'>{percentChange.toFixed(2)}%</p>}
 
