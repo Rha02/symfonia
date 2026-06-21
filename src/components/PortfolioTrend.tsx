@@ -75,8 +75,18 @@ export default function PortfolioTrend(props: PortfolioTrendProps) {
     }, [props.mode])
 
     useEffect(() => {
-        fetchCoords(period)
-    }, [period, fetchCoords])
+        let ignore = false
+        const run = async () => {
+            const newCoords = await fetchTrendCoords(props.mode, period)
+            if (!ignore) {
+                setCoords(newCoords)
+            }
+        }
+        run()
+        return () => {
+            ignore = true
+        }
+    }, [period, props.mode])
 
     const options = {
         responsive: true,
