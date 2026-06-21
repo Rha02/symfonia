@@ -11,7 +11,7 @@ import {
     Legend,
 } from 'chart.js';
 import { Eye, Reload } from '@/components/icons'
-import { PortfolioResponse, TrendCoord } from '@/models';
+import { PortfolioResponse, StockTrendCoord, TrendCoord } from '@/models';
 import { useCallback, useEffect, useState } from 'react';
 
 ChartJS.register(
@@ -24,31 +24,55 @@ ChartJS.register(
     Legend
 );
 
+type TrendMode =
+    | { type: 'portfolio' }
+    | { type: 'stock', symbol: string }
+
 type PortfolioTrendProps = {
-    coords: TrendCoord[]
+    mode: TrendMode
 }
 
 const PERIODS = ['1D', '1W', '1M', '3M', '1Y', '5Y', 'All'] as const;
 type Period = typeof PERIODS[number];
 
+const buildUrl = (mode: TrendMode, period: Period) => {
+    if (mode.type === 'portfolio') {
+        return `/api/portfolio/trend?period=${period}`
+    }
+    return `/api/stocks/${mode.symbol}/trend?period=${period}`
+}
+
+const fetchTrendCoords = async (mode: TrendMode, period: Period) => {
+    const res = await fetch(buildUrl(mode, period))
+    if (!res.ok) {
+        return []
+    }
+    if (mode.type == 'stock') {
+        const data: StockTrendCoord[] = await res.json()
+        const coords: TrendCoord[] = data.map(st => {
+            return {
+                value: st.vw,
+                timestamp: st.t
+            }
+        })
+        return coords
+    }
+    const data: PortfolioResponse = await res.json()
+    const coords: TrendCoord[] = data.timestamp.map((ts, i) => ({
+        timestamp: new Date(ts * 1000).toISOString(),
+        value: data.equity[i],
+    }))
+    return coords
+}
+
 export default function PortfolioTrend(props: PortfolioTrendProps) {
     const [coords, setCoords] = useState<TrendCoord[]>([])
     const [period, setPeriod] = useState<Period>('1D')
-    const [loading, setLoading] = useState(true)
 
     const fetchCoords = useCallback(async (p: Period) => {
-        try {
-            const res = await fetch(`/api/portfolio/trend?period=${p}`)
-            const data: PortfolioResponse = await res.json()
-            const newCoords: TrendCoord[] = data.timestamp.map((ts, i) => ({
-                timestamp: new Date(ts * 1000).toISOString(),
-                value: data.equity[i],
-            }))
-            setCoords(newCoords)
-        } finally {
-            setLoading(false)
-        }
-    }, [])
+        const newCoords = await fetchTrendCoords(props.mode, p)
+        setCoords(newCoords)
+    }, [props.mode])
 
     useEffect(() => {
         fetchCoords(period)
@@ -69,12 +93,12 @@ export default function PortfolioTrend(props: PortfolioTrendProps) {
                         if (idx < 30) {
                             return null
                         }
-                        
+
                         const date = new Date(labels[Number(value)])
-                        return date.toLocaleTimeString([], { 
-                            hour: '2-digit', 
-                            minute: '2-digit', 
-                            hour12: false 
+                        return date.toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
                         })
                     }
                 }
@@ -99,7 +123,6 @@ export default function PortfolioTrend(props: PortfolioTrendProps) {
     }
 
     const onReload = () => {
-        setLoading(true)
         fetchCoords(period)
     }
 
@@ -131,7 +154,11 @@ export default function PortfolioTrend(props: PortfolioTrendProps) {
     )
 }
 
-function PriceComponent(props: PortfolioTrendProps) {
+type PriceComponentProps = {
+    coords: TrendCoord[]
+}
+
+function PriceComponent(props: PriceComponentProps) {
     const coords = props.coords
 
     if (coords.length === 0) {
@@ -144,7 +171,7 @@ function PriceComponent(props: PortfolioTrendProps) {
     }
 
     let i = 0
-    for (; i < coords.length && coords[i].value == 0; i++) {}
+    for (; i < coords.length && coords[i].value == 0; i++) { }
 
     const firstPrice = coords[i].value
     const lastPrice = coords[coords.length - 1].value
