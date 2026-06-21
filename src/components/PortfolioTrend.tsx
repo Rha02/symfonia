@@ -9,10 +9,12 @@ import {
     Title,
     Tooltip,
     Legend,
+    ChartOptions,
 } from 'chart.js';
 import { Eye, Reload } from '@/components/icons'
 import { PortfolioResponse, StockTrendCoord, TrendCoord } from '@/models';
 import { useCallback, useEffect, useState } from 'react';
+import CrosshairPlugin from '@/lib/plugins/crosshair';
 
 ChartJS.register(
     CategoryScale,
@@ -21,7 +23,8 @@ ChartJS.register(
     LineElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    CrosshairPlugin
 );
 
 type TrendMode =
@@ -65,6 +68,35 @@ const fetchTrendCoords = async (mode: TrendMode, period: Period) => {
     return coords
 }
 
+const formatTrendLabel = (isoString: string, period: Period) => {
+    const date = new Date(isoString)
+
+    if (period === '1D') {
+        return date.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        })
+    }
+
+    if (period === '1W' || period === '1M' || period === '3M' || period === '1Y') {
+        return date.toLocaleDateString([], {
+            month: 'short',
+            day: 'numeric', 
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        })
+    }
+
+    // 5Y, All
+    return date.toLocaleDateString([], {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+    })
+}
+
 export default function PortfolioTrend(props: PortfolioTrendProps) {
     const [coords, setCoords] = useState<TrendCoord[]>([])
     const [period, setPeriod] = useState<Period>('1D')
@@ -88,29 +120,49 @@ export default function PortfolioTrend(props: PortfolioTrendProps) {
         }
     }, [period, props.mode])
 
-    const options = {
+    const options: ChartOptions<'line'> = {
         responsive: true,
+        interaction: {
+            mode: 'index' as const,
+            intersect: false
+        },
         plugins: {
             legend: {
                 display: false
+            },
+            tooltip: {
+                enabled: true,
+                mode: 'index' as const,
+                intersect: false,
+                callbacks: {
+                    title: (items) => {
+                        const date = labels[items[0].dataIndex]
+                        return formatTrendLabel(date, period)
+                    },
+                    label: (item) => `Value: ${item.formattedValue}`
+                }
             }
         },
         scales: {
             x: {
+                grid: {
+                    display: false
+                },
                 ticks: {
                     maxTicksLimit: 5,
-                    callback: (value: string | number, idx: number) => {
-                        if (idx < 30) {
-                            return null
-                        }
-
-                        const date = new Date(labels[Number(value)])
-                        return date.toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: false
-                        })
+                    callback: (value, idx) => {
+                        if (idx === 0) return ''
+                        const date = labels[Number(value)]
+                        return formatTrendLabel(date, period)
                     }
+                }
+            },
+            y: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    maxTicksLimit: 4
                 }
             }
         }
